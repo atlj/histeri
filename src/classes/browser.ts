@@ -28,6 +28,7 @@ class Engine {
   pages: Array<Page>;
   currentLessonIndex: number;
   loadLastIndex: boolean;
+  headless: boolean;
 
   constructor() {
     this.pages = [];
@@ -36,6 +37,7 @@ class Engine {
     this.set2X = false; /**when true sets video playback rate to 2X */
     this.simultaniousLessonCount = 10;
     this.loadLastIndex = true;
+    this.headless = true;
     if (this.loadLastIndex) {
       this.currentLessonIndex = loadedLastIndex;
     }
@@ -50,7 +52,7 @@ class Engine {
   }
 
   async build() {
-    this.engine = await chromium.launch({ headless: false });
+    this.engine = await chromium.launch({ headless: this.headless });
     this.context = await this.engine.newContext();
     this.pages.push(await this.context.newPage());
     await this.pages[0].goto(config.url);
