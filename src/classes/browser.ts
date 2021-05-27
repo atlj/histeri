@@ -19,6 +19,7 @@ interface lesson {
   name: string;
 }
 
+//TODO CURRENT TIME UNDEFINED
 class Engine {
   lessons: Array<Page>;
   engine: Browser;
@@ -35,9 +36,9 @@ class Engine {
     this.lessons = [];
     this.currentLessonIndex = 1; /**this number determines the lesson script will first start with */
     this.set2X = false; /**when true sets video playback rate to 2X */
-    this.simultaniousLessonCount = 10;
+    this.simultaniousLessonCount = 3;
     this.loadLastIndex = true;
-    this.headless = true;
+    this.headless = false;
     if (this.loadLastIndex) {
       this.currentLessonIndex = loadedLastIndex;
     }
@@ -84,20 +85,16 @@ class Engine {
       '[class="coursename"] >> text=KLİNİK BİLİMLERE GİRİŞ'
     );
     await this.pages[0].click('[id="list"]', { timeout: 200000 });
-    for (
-      this.currentLessonIndex;
-      this.currentLessonIndex < this.simultaniousLessonCount + 1;
-      this.currentLessonIndex++
-    ) {
+    for (let idx = 0; idx < this.simultaniousLessonCount; idx++) {
       await this.pages[0].click(
         `:nth-match([class="view"], ${this.currentLessonIndex})`
       );
+      this.currentLessonIndex++;
+      saveCurrentIndex(this.currentLessonIndex);
     }
-    saveCurrentIndex(this.currentLessonIndex + this.simultaniousLessonCount);
   }
 
   async lessonhandler(page: Page) {
-    console.log("perculustasınız."); //TODO REMOVE
     page
       .click(`[class="btn btn-primary pointer "] >> text=tamam `, {
         timeout: 0,
@@ -109,8 +106,10 @@ class Engine {
     const checkTime = new CronJob("*/5 * * * * *", async () => {
       const currentTime = await page
         .innerText(`[id="rec-current"]`, { timeout: 4999 })
-        .catch(() => {});
-      console.log("current time: " + currentTime);
+        .catch((error) => {
+          console.log(error);
+        });
+      console.log("time: " + currentTime + "/" + duration);
       if (duration === currentTime) {
         page.close();
         this.newpage();
@@ -126,7 +125,6 @@ class Engine {
         });
       if (_duration !== "00:00") {
         duration = _duration;
-        console.log("duration: ", duration);
         if (this.set2X) {
           page.selectOption(`[class="playbackrate"]`, { value: "2" });
         }
@@ -139,13 +137,23 @@ class Engine {
     page
       .innerText("text=Bu oturum hiç gerçekleşmedi (eğitmen yok).")
       .then(() => {
+        console.log("geçersiz ders");
+
         page.close();
         this.newpage();
         return;
       })
-      .catch(() => {
-        console.log("nema problema");
-      });
+      .catch(() => {});
+    page
+      .innerText("text=Aktif oturum içeriği bulunmuyor.")
+      .then(() => {
+        console.log("geçersiz ders");
+
+        page.close();
+        this.newpage();
+        return;
+      })
+      .catch(() => {});
   }
 }
 
