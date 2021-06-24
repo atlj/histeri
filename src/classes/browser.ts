@@ -35,8 +35,8 @@ class Engine {
     this.pages = [];
     this.lessons = [];
     this.currentLessonIndex = 1; /**this number determines the lesson script will first start with */
-    this.set2X = false; /**when true sets video playback rate to 2X */
-    this.simultaniousLessonCount = 3;
+    this.set2X = true; /**when true sets video playback rate to 2X */
+    this.simultaniousLessonCount = 6;
     this.loadLastIndex = true;
     this.headless = false;
     if (this.loadLastIndex) {
